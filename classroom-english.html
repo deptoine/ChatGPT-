@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom English - 52 questions</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --blue: #3157d5;
+      --purple: #7552c7;
+      --ink: #17213a;
+      --muted: #68748c;
+      --border: #dce3ef;
+      --good: #168542;
+      --bad: #c93636;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 22px 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #eaf2ff, #f7efff);
+    }
+    .container { width: min(860px, 100%); margin: auto; }
+    .panel {
+      padding: 23px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(49,87,213,.10);
+      border-radius: 21px;
+      background: white;
+      box-shadow: 0 12px 38px rgba(35,54,102,.12);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0 0 7px; font-size: 26px; }
+    .muted { color: var(--muted); }
+    .scores { display: flex; gap: 9px; flex-wrap: wrap; }
+    .score {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f3f6fb;
+    }
+    .track {
+      height: 10px;
+      margin-top: 18px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #e7ecf4;
+    }
+    #bar {
+      width: 0;
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      transition: width .3s;
+    }
+    .question-row {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin: 13px 0 22px;
+    }
+    #question {
+      flex: 1;
+      font-size: 25px;
+      font-weight: bold;
+      line-height: 1.35;
+    }
+    #audio {
+      width: 54px;
+      height: 54px;
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 14px;
+      background: #e8efff;
+      font-size: 25px;
+      cursor: pointer;
+    }
+    #audio:hover { background: #dbe6ff; }
+    #choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .choice {
+      min-height: 62px;
+      padding: 14px 15px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      color: var(--ink);
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.3;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .choice:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: #6979e8;
+      background: #f7f8ff;
+    }
+    .choice:disabled { color: var(--ink); cursor: default; }
+    .choice.good { border-color: var(--good); background: #ecfdf3; }
+    .choice.bad { border-color: var(--bad); background: #fff0f0; }
+    #feedback {
+      min-height: 55px;
+      padding-top: 17px;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+    .actions { text-align: right; }
+    .main-button {
+      min-height: 46px;
+      padding: 12px 19px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .main-button:disabled { opacity: .38; cursor: not-allowed; }
+    .hidden { display: none !important; }
+    #results { padding: 34px 23px; text-align: center; }
+    .trophy { font-size: 48px; }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+      margin: 22px 0;
+    }
+    .result-box { padding: 16px; border-radius: 14px; background: #f3f6fb; }
+    .result-box strong { display: block; margin-top: 6px; font-size: 24px; }
+    .note { margin-top: 12px; font-size: 13px; color: var(--muted); text-align: center; }
+    @media (max-width: 620px) {
+      body { padding: 12px; }
+      .panel { padding: 18px; }
+      #choices, .result-grid { grid-template-columns: 1fr; }
+      #question { font-size: 21px; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="panel">
+      <div class="header">
+        <div>
+          <h1 id="phaseTitle">🇫🇷 → 🇬🇧 Français vers anglais</h1>
+          <div id="progress" class="muted">Question 1 / 26</div>
+        </div>
+        <div class="scores">
+          <div class="score">Série : <strong id="seriesScore">0 / 26</strong></div>
+          <div class="score">Total : <strong id="totalScore">0 / 52</strong></div>
+        </div>
+      </div>
+      <div class="track"><div id="bar"></div></div>
+    </section>
+
+    <section id="quiz" class="panel">
+      <div id="instruction" class="muted">Choisis la bonne traduction anglaise.</div>
+      <div class="question-row">
+        <div id="question"></div>
+        <button id="audio" class="hidden" type="button" title="Écouter la phrase anglaise" aria-label="Écouter la phrase anglaise">🔊</button>
+      </div>
+      <div id="choices"></div>
+      <div id="feedback" aria-live="polite"></div>
+      <div class="actions">
+        <button id="next" class="main-button" type="button" disabled>Question suivante →</button>
+      </div>
+    </section>
+
+    <section id="results" class="panel hidden">
+      <div class="trophy">🎉</div>
+      <h2>Exercice terminé !</h2>
+      <div id="resultGrid"></div>
+      <p id="resultMessage"></p>
+      <button id="restart" class="main-button" type="button">Recommencer les 52 questions</button>
+    </section>
+    <div class="note">L'audio utilise la voix anglaise installée sur l'appareil.</div>
+  </main>
+
+  <script>
+    (function () {
+      const items = [
+        { en: "Sit down!", fr: "Asseyez-vous !" },
+        { en: "Stand up!", fr: "Levez-vous !" },
+        { en: "Open / Close", fr: "Ouvrir / Fermer" },
+        { en: "Take!", fr: "Prenez !" },
+        { en: "Listen!", fr: "Écoutez !" },
+        { en: "Look!", fr: "Regardez !" },
+        { en: "Write!", fr: "Écrivez !" },
+        { en: "Be quiet!", fr: "Chut ! / Silence !" },
+        { en: "Put your hands up!", fr: "Levez la main !" },
+        { en: "Fold!", fr: "Pliez !" },
+        { en: "Stick!", fr: "Collez !" },
+        { en: "Cut!", fr: "Coupez !" },
+        { en: "Can you switch on / off the light?", fr: "Peux-tu allumer / éteindre la lumière ?" },
+        { en: "Can I go to the bin?", fr: "Puis-je aller à la poubelle ?" },
+        { en: "Can you open the window?", fr: "Peux-tu ouvrir la fenêtre ?" },
+        { en: "Can you draw the curtains?", fr: "Peux-tu tirer les rideaux ?" },
+        { en: "Can I take a tissue?", fr: "Puis-je prendre un mouchoir ?" },
+        { en: "Can you move, please?", fr: "Peux-tu te déplacer, s'il te plaît ?" },
+        { en: "Can you play it again?", fr: "Peux-tu le repasser, s'il te plaît ?" },
+        { en: "Can I give out the documents?", fr: "Puis-je distribuer les documents ?" },
+        { en: "Can I collect the documents?", fr: "Puis-je ramasser les documents ?" },
+        { en: "I don't understand.", fr: "Je ne comprends pas." },
+        { en: "I don't know.", fr: "Je ne sais pas." },
+        { en: "What's the English for …?", fr: "Comment dit-on … en anglais ?" },
+        { en: "What's the French for …?", fr: "Comment dit-on … en français ?" },
+        { en: "Can I be your assistant?", fr: "Puis-je être ton assistant(e) ?" }
+      ];
+
+      const el = function (id) { return document.getElementById(id); };
+      let phase = 0;
+      let position = 0;
+      let answered = false;
+      let scores = [0, 0];
+      let total = 0;
+      let order = [];
+
+      function shuffle(values) {
+        const result = values.slice();
+        for (let i = result.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const temp = result[i];
+          result[i] = result[j];
+          result[j] = temp;
+        }
+        return result;
+      }
+
+      function createOrder() {
+        order = shuffle(items.map(function (_, index) { return index; }));
+      }
+
+      function render() {
+        answered = false;
+        el("feedback").textContent = "";
+        el("next").disabled = true;
+        el("choices").innerHTML = "";
+
+        const reverse = phase === 1;
+        const item = items[order[position]];
+        const correct = reverse ? item.fr : item.en;
+        const answerField = reverse ? "fr" : "en";
+
+        el("phaseTitle").textContent = reverse
+          ? "🇬🇧 → 🇫🇷 Anglais vers français"
+          : "🇫🇷 → 🇬🇧 Français vers anglais";
+        el("progress").textContent = "Question " + (position + 1) + " / 26";
+        el("instruction").textContent = reverse
+          ? "Écoute la phrase anglaise, puis choisis sa traduction française."
+          : "Choisis la bonne traduction anglaise.";
+        el("question").textContent = reverse ? item.en : item.fr;
+        el("audio").classList.toggle("hidden", !reverse);
+        el("seriesScore").textContent = scores[phase] + " / 26";
+        el("totalScore").textContent = total + " / 52";
+        el("bar").style.width = ((phase * 26 + position) / 52 * 100) + "%";
+
+        const incorrect = shuffle(
+          items.map(function (entry) { return entry[answerField]; })
+            .filter(function (answer) { return answer !== correct; })
+        ).slice(0, 3);
+
+        shuffle([correct].concat(incorrect)).forEach(function (answer) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.textContent = answer;
+          button.addEventListener("click", function () {
+            checkAnswer(button, answer, correct);
+          });
+          el("choices").appendChild(button);
+        });
+      }
+
+      function checkAnswer(selectedButton, selectedAnswer, correctAnswer) {
+        if (answered) return;
+        answered = true;
+
+        Array.from(document.querySelectorAll(".choice")).forEach(function (button) {
+          button.disabled = true;
+          if (button.textContent === correctAnswer) button.classList.add("good");
+        });
+
+        if (selectedAnswer === correctAnswer) {
+          scores[phase]++;
+          total++;
+          el("feedback").textContent = "✅ Bonne réponse !";
+        } else {
+          selectedButton.classList.add("bad");
+          el("feedback").textContent = "❌ Bonne réponse : " + correctAnswer;
+        }
+
+        el("seriesScore").textContent = scores[phase] + " / 26";
+        el("totalScore").textContent = total + " / 52";
+        el("next").disabled = false;
+      }
+
+      function nextQuestion() {
+        if (!answered) return;
+
+        if (position < 25) {
+          position++;
+          render();
+        } else if (phase === 0) {
+          phase = 1;
+          position = 0;
+          createOrder();
+          render();
+        } else {
+          showResults();
+        }
+      }
+
+      function speakEnglish() {
+        if (!("speechSynthesis" in window)) {
+          el("feedback").textContent = "🔇 La lecture audio n'est pas disponible sur ce navigateur.";
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+        const text = items[order[position]].en.replace("…", "");
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-GB";
+        utterance.rate = 0.82;
+
+        const voices = window.speechSynthesis.getVoices();
+        utterance.voice =
+          voices.find(function (voice) { return voice.lang === "en-GB"; }) ||
+          voices.find(function (voice) { return voice.lang.indexOf("en") === 0; }) ||
+          null;
+
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function showResults() {
+        el("quiz").classList.add("hidden");
+        el("results").classList.remove("hidden");
+        el("phaseTitle").textContent = "Résultats";
+        el("progress").textContent = "52 questions terminées";
+        el("seriesScore").textContent = scores[1] + " / 26";
+        el("totalScore").textContent = total + " / 52";
+        el("bar").style.width = "100%";
+
+        el("resultGrid").innerHTML =
+          '<div class="result-grid">' +
+          '<div class="result-box">Français → anglais<strong>' + scores[0] + ' / 26</strong></div>' +
+          '<div class="result-box">Anglais → français<strong>' + scores[1] + ' / 26</strong></div>' +
+          '<div class="result-box">Total<strong>' + total + ' / 52</strong></div>' +
+          "</div>";
+
+        el("resultMessage").textContent =
+          total >= 47 ? "Excellent travail ! 🌟" :
+          total >= 39 ? "Très bon résultat ! 👏" :
+          total >= 31 ? "Bien ! Encore un petit entraînement. 👍" :
+          "Recommence pour mieux mémoriser. 💪";
+      }
+
+      function restart() {
+        phase = 0;
+        position = 0;
+        answered = false;
+        scores = [0, 0];
+        total = 0;
+        el("quiz").classList.remove("hidden");
+        el("results").classList.add("hidden");
+        createOrder();
+        render();
+      }
+
+      el("next").addEventListener("click", nextQuestion);
+      el("audio").addEventListener("click", speakEnglish);
+      el("restart").addEventListener("click", restart);
+
+      createOrder();
+      render();
+    })();
+  </script>
+</body>
+</html>
